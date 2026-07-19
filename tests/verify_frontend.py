@@ -13,10 +13,13 @@ inside the page, which drives the same handlers as a user drag.
 """
 
 import sys
+from datetime import date, timedelta
 
 from playwright.sync_api import sync_playwright
 
 FRONTEND = "http://localhost:5500"
+YESTERDAY = (date.today() - timedelta(days=1)).isoformat()
+TOMORROW = (date.today() + timedelta(days=1)).isoformat()
 
 results: list[bool] = []
 
@@ -41,10 +44,14 @@ def drag(page, task_id: int, to_status: str) -> None:
     )
 
 
-def create_task_via_modal(page, title: str, priority: str) -> None:
+def create_task_via_modal(page, title: str, priority: str, due_date: str = "", tags: str = "") -> None:
     page.click("#new-task-btn")
     page.fill("#field-title", title)
     page.select_option("#field-priority", priority)
+    if due_date:
+        page.fill("#field-due-date", due_date)
+    if tags:
+        page.fill("#field-tags", tags)
     page.click("#modal-save-btn")
     page.wait_for_selector("#modal-overlay", state="hidden")
 
@@ -182,6 +189,41 @@ def main() -> None:
         check("Escape, Cancel, X, and overlay click all dismiss the modal",
               escape_closes and cancel_closes and x_closes and overlay_closes)
         check("Reopened modal has no stale values or errors", stale_cleared)
+
+        # --- Mid-course feature 1: due dates + overdue -------------------------
+        create_task_via_modal(page, "Dated future", "Low", due_date=TOMORROW)
+        create_task_via_modal(page, "Dated past", "Low", due_date=YESTERDAY)
+        page.wait_for_selector(".due-badge.overdue")
+        due_badges = page.eval_on_selector_all(
+            ".due-badge", "els => els.map(e => e.textContent)"
+        )
+        check("Due date shows on card; past-due open task gets Overdue pill",
+              any(b == f"Due {TOMORROW}" for b in due_badges)
+              and any(b.startswith("Overdue") for b in due_badges))
+
+        page.check("#filter-overdue")
+        page.wait_for_function(
+            "() => document.querySelectorAll('.card').length === 1"
+        )
+        check("Overdue-only filter shows only the overdue task",
+              column_titles(page, "ToDo") == ["Dated past"])
+        page.uncheck("#filter-overdue")
+        page.wait_for_function("() => document.querySelectorAll('.card').length === 5")
+
+        # --- Mid-course feature 2: tags ------------------------------------------
+        create_task_via_modal(page, "Tagged card", "Medium", tags="frontend, api")
+        page.wait_for_selector(".tag-chip")
+        chips = page.eval_on_selector_all(".tag-chip", "els => els.map(e => e.textContent)")
+        check("Tags render as chips on the card", chips == ["frontend", "api"])
+
+        page.fill("#filter-tag", "api")
+        page.wait_for_function("() => document.querySelectorAll('.card').length === 1")
+        check("Tag filter shows only tasks carrying that tag",
+              column_titles(page, "ToDo") == ["Tagged card"])
+
+        page.click("#filter-clear")
+        page.wait_for_function("() => document.querySelectorAll('.card').length === 6")
+        check("Clear filters restores the full board", True)
 
         # --- Contract 5: error state when the backend is unreachable ------------
         page.route("**/tasks", lambda route: route.abort())

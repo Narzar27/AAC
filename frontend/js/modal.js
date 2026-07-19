@@ -16,6 +16,8 @@ const fields = {
   status: document.getElementById("field-status"),
   priority: document.getElementById("field-priority"),
   assignee: document.getElementById("field-assignee"),
+  dueDate: document.getElementById("field-due-date"),
+  tags: document.getElementById("field-tags"),
 };
 
 const titleError = document.getElementById("error-title");
@@ -63,6 +65,8 @@ export function openEditModal(task) {
   fields.status.value = task.status;
   fields.priority.value = task.priority;
   fields.assignee.value = task.assignee ?? "";
+  fields.dueDate.value = task.due_date ?? "";
+  fields.tags.value = (task.tags ?? []).join(", ");
   clearErrors();
   modalTitle.textContent = `Edit Task #${task.id}`;
   overlay.hidden = false;
@@ -89,7 +93,19 @@ function readPayload() {
     priority: fields.priority.value,
     // Backend treats assignee as optional: send null instead of "".
     assignee: fields.assignee.value.trim() || null,
+    // Empty date input means "no due date" — null clears it on edit.
+    due_date: fields.dueDate.value || null,
+    // Comma-separated input -> trimmed list; blank entries dropped client-side,
+    // but the backend still validates length, count, and duplicates.
+    tags: fields.tags.value.split(",").map((t) => t.trim()).filter(Boolean),
   };
+}
+
+function valuesEqual(a, b) {
+  if (Array.isArray(a) || Array.isArray(b)) {
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+  return a === b;
 }
 
 async function handleSubmit(event) {
@@ -111,7 +127,8 @@ async function handleSubmit(event) {
       // current status would be rejected as a same-status transition.
       const changes = {};
       for (const [key, value] of Object.entries(payload)) {
-        if (value !== (editingTask[key] ?? null)) changes[key] = value;
+        const current = key === "tags" ? (editingTask.tags ?? []) : (editingTask[key] ?? null);
+        if (!valuesEqual(value, current)) changes[key] = value;
       }
       if (Object.keys(changes).length === 0) {
         closeModal();

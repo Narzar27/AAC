@@ -12,6 +12,15 @@
     <button type="button" id="new-task-btn" class="btn btn-primary">+ New Task</button>
   </header>
 
+  <div class="filter-bar">
+    <label class="filter-toggle" for="filter-overdue">
+      <input type="checkbox" id="filter-overdue" />
+      Overdue only
+    </label>
+    <input type="text" id="filter-tag" class="filter-input" placeholder="Filter by tag…" autocomplete="off" />
+    <button type="button" id="filter-clear" class="btn">Clear filters</button>
+  </div>
+
   <p id="board-message" class="board-message" hidden></p>
 
   <main id="board" class="board" aria-busy="true">
@@ -61,9 +70,22 @@
           </div>
         </div>
 
+        <div class="form-row">
+          <div class="form-field">
+            <label for="field-assignee">Assignee</label>
+            <input type="text" id="field-assignee" name="assignee" autocomplete="off" />
+          </div>
+
+          <div class="form-field">
+            <label for="field-due-date">Due date</label>
+            <input type="date" id="field-due-date" name="due_date" />
+          </div>
+        </div>
+
         <div class="form-field">
-          <label for="field-assignee">Assignee</label>
-          <input type="text" id="field-assignee" name="assignee" autocomplete="off" />
+          <label for="field-tags">Tags <span class="field-hint">(comma-separated)</span></label>
+          <input type="text" id="field-tags" name="tags" autocomplete="off" placeholder="e.g. frontend, api" />
+          <p class="field-error" id="error-tags" hidden></p>
         </div>
 
         <p class="field-error" id="error-server" hidden></p>

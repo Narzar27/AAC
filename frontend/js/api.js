@@ -46,8 +46,12 @@ async function request(path, options = {}) {
   return response.status === 204 ? null : response.json();
 }
 
-export function fetchTasks() {
-  return request("/tasks");
+export function fetchTasks(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.overdue) params.set("overdue", "true");
+  if (filters.tag) params.set("tag", filters.tag);
+  const query = params.toString();
+  return request(query ? `/tasks?${query}` : "/tasks");
 }
 
 export function createTask(payload) {

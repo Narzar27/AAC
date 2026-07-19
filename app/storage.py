@@ -3,7 +3,7 @@ database is out of scope until a later module."""
 
 from datetime import datetime, timezone
 
-from app.models import TaskCreate, TaskPriority, TaskStatus
+from app.models import TaskCreate, TaskPriority, TaskStatus, is_overdue
 
 _tasks: dict[int, dict] = {}
 _next_id: int = 1
@@ -30,12 +30,18 @@ def add_task(task: TaskCreate) -> dict:
 def get_all_tasks(
     status: TaskStatus | None = None,
     priority: TaskPriority | None = None,
+    overdue: bool | None = None,
+    tag: str | None = None,
 ) -> list[dict]:
     tasks = list(_tasks.values())
     if status is not None:
         tasks = [t for t in tasks if t["status"] == status]
     if priority is not None:
         tasks = [t for t in tasks if t["priority"] == priority]
+    if overdue is not None:
+        tasks = [t for t in tasks if is_overdue(t["due_date"], t["status"]) == overdue]
+    if tag is not None:
+        tasks = [t for t in tasks if tag in t["tags"]]
     return tasks
 
 

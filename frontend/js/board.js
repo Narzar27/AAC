@@ -17,6 +17,15 @@ export function setEditHandler(handler) {
   onEditTask = handler;
 }
 
+// Active board filters (overdue toggle + tag). The backend does the filtering;
+// the board just re-fetches with the current filters.
+const filters = { overdue: false, tag: "" };
+
+export async function applyFilters(partial) {
+  Object.assign(filters, partial);
+  await refreshBoard();
+}
+
 // --- UI states (loading / error / ready) -----------------------------------
 
 function showMessage(text, { isError = false } = {}) {
@@ -33,7 +42,7 @@ export async function refreshBoard() {
   showMessage("Loading tasks…");
   boardEl.setAttribute("aria-busy", "true");
   try {
-    const tasks = await fetchTasks();
+    const tasks = await fetchTasks(filters);
     clearMessage();
     renderBoard(tasks);
   } catch (error) {
@@ -120,11 +129,26 @@ function buildCard(task) {
     "",
     el("span", `priority-badge priority-${task.priority.toLowerCase()}`, task.priority),
   );
+  if (task.due_date) {
+    // The backend computes is_overdue; the card only displays it.
+    meta.append(
+      task.is_overdue
+        ? el("span", "due-badge overdue", `Overdue · ${task.due_date}`)
+        : el("span", "due-badge", `Due ${task.due_date}`),
+    );
+  }
   if (task.assignee) {
     meta.append(el("span", "card-assignee", task.assignee));
   }
 
   card.append(meta);
+
+  if (task.tags?.length) {
+    card.append(
+      el("div", "card-tags", "", ...task.tags.map((tag) => el("span", "tag-chip", tag))),
+    );
+  }
+
   wireCardDrag(card);
   return card;
 }
