@@ -55,3 +55,22 @@ evidence the 28-test suite protects real behavior rather than just passing. The
 biggest judgment call was documentation drift — Module 2's transition rules
 contradict the Module 1 user stories (Done is now reopenable, no-ops are rejected),
 so Story 5 was rewritten rather than leaving the docs lying about the code.
+
+# Reflection Log — Module 3 Hands-On
+
+The frontend went up in the module's layer order — static layout, styling,
+fetch/render, UI states, drag-and-drop, then the modal — and the AI was fastest at
+exactly the layers the lecture predicts: markup, CSS, and render boilerplate came
+out nearly right, while every real bug lived at a boundary. The four debugging-log
+entries all fit that pattern: a Pydantic union that turned explicit null into a 500,
+CSS `display: flex` silently defeating the `hidden` attribute, an edit form whose
+full-payload PATCH collided with the backend's same-status rule, and an error
+message erased by the board refresh one line later. None of them were visible by
+reading the code "looking right" — all four were caught because the behavior
+contract is an executable script (14 headless-browser checks) rather than a manual
+checklist, which is the module's core lesson made literal. The refactor workflow
+held up: contract green, git checkpoint, one selected section (render logic),
+diff reviewed against the red-flag list, contract green again. The main correction
+habit this module: when the frontend and backend disagreed, the fix always went
+where the cause was — the backend rules were never loosened to make the UI's life
+easier.

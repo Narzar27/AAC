@@ -1,10 +1,14 @@
-# Task Tracker API — Modules 1–2
+# Task Tracker — Modules 1–3
 
-Task Tracker backend for the AI-Assisted Coding course. Module 1 built the FastAPI
-skeleton with `/health`; Module 2 turned it into a working backend: strict Pydantic v2
-models, in-memory storage, five CRUD endpoints, status-transition business rules, and
-a pytest suite proven with a Break Test. Still deliberately excluded: auth, real
-database, deployment.
+Task Tracker for the AI-Assisted Coding course. Module 1 built the FastAPI skeleton
+with `/health`; Module 2 turned it into a working backend (strict Pydantic v2 models,
+in-memory storage, five CRUD endpoints, status-transition rules, tested suite);
+Module 3 added the browser frontend: a Kanban board with priority-sorted columns,
+drag-and-drop status updates persisted through the API, and a create/edit modal with
+client- and server-side validation. Still deliberately excluded: auth, real database,
+deployment.
+
+![Kanban board](docs/board.png)
 
 ## Project structure
 
@@ -16,12 +20,20 @@ app/
   business_rules.py  # VALID_TRANSITIONS + validate_status_transition
   api/routes/        # health router
   core/              # configuration
+frontend/
+  index.html         # Kanban board page + create/edit modal markup
+  css/styles.css
+  js/api.js          # fetch layer — the only module that talks to the backend
+  js/board.js        # column/card rendering, UI states, drag-and-drop
+  js/modal.js        # create/edit form, client validation, 422 handling
+  js/main.js         # entry point wiring board + modal
 tests/
   verify_a.py        # Module 2 Verification A (8 model checks)
+  verify_frontend.py # Module 3 executable behavior contract (headless Chromium)
   conftest.py        # TestClient, autouse storage reset, created_task fixtures
-  test_tasks.py      # CRUD, validation, transition, delete tests
+  test_tasks.py      # CRUD, validation, transition, delete, PATCH edge cases
   test_health.py
-docs/                # user stories, ADR, prompt/correction/reflection logs
+docs/                # user stories, ADR, behavior contract, debugging + other logs
 ```
 
 ## API
@@ -51,9 +63,19 @@ uvicorn app.main:app --reload
 
 Swagger docs: http://localhost:8000/docs
 
+To run the frontend, serve `frontend/` on port 5500 (CORS is configured for it)
+in a second terminal, with the backend running on port 8000:
+
+```bash
+python -m http.server 5500 --directory frontend
+# open http://localhost:5500
+```
+
 ## Verification
 
 ```bash
-python -m tests.verify_a     # 8 model checks, all PASS
-pytest tests/ -v             # full suite
+python -m tests.verify_a         # 8 model checks, all PASS
+pytest tests/ -v                 # full backend suite
+python -m tests.verify_frontend  # 14 browser contract checks (needs both servers
+                                 # running and playwright chromium installed)
 ```

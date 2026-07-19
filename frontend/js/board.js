@@ -63,81 +63,65 @@ export function renderBoard(tasks) {
   boardEl.replaceChildren(...columns);
 }
 
+/** Create an element with a class, text content, and children. */
+function el(tag, className, text = "", ...children) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text) node.textContent = text;
+  node.append(...children);
+  return node;
+}
+
 function buildColumn(status, tasks) {
-  const column = document.createElement("section");
-  column.className = "column";
-  column.dataset.status = status;
+  const header = el(
+    "div",
+    "column-header",
+    "",
+    el("h2", "", STATUS_LABELS[status]),
+    el("span", "column-count", String(tasks.length)),
+  );
 
-  const header = document.createElement("div");
-  header.className = "column-header";
-  const title = document.createElement("h2");
-  title.textContent = STATUS_LABELS[status];
-  const count = document.createElement("span");
-  count.className = "column-count";
-  count.textContent = String(tasks.length);
-  header.append(title, count);
-
-  const list = document.createElement("div");
-  list.className = "card-list";
-
+  const list = el("div", "card-list", "");
   if (tasks.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "column-empty";
-    empty.textContent = "No tasks";
-    list.append(empty);
+    list.append(el("p", "column-empty", "No tasks"));
   } else {
     list.append(...tasks.map(buildCard));
   }
 
-  column.append(header, list);
+  const column = el("section", "column", "", header, list);
+  column.dataset.status = status;
   wireColumnDropTarget(column);
   return column;
 }
 
 function buildCard(task) {
-  const card = document.createElement("article");
-  card.className = "card";
+  const editBtn = el("button", "btn btn-icon", "✎");
+  editBtn.type = "button";
+  editBtn.setAttribute("aria-label", `Edit task: ${task.title}`);
+  editBtn.addEventListener("click", () => onEditTask?.(task));
+
+  const card = el(
+    "article",
+    "card",
+    "",
+    el("div", "card-top", "", el("h3", "card-title", task.title), editBtn),
+  );
   card.draggable = true;
   card.dataset.taskId = String(task.id);
   card.dataset.status = task.status;
 
-  const top = document.createElement("div");
-  top.className = "card-top";
-
-  const title = document.createElement("h3");
-  title.className = "card-title";
-  title.textContent = task.title;
-
-  const editBtn = document.createElement("button");
-  editBtn.type = "button";
-  editBtn.className = "btn btn-icon";
-  editBtn.textContent = "✎";
-  editBtn.setAttribute("aria-label", `Edit task: ${task.title}`);
-  editBtn.addEventListener("click", () => onEditTask?.(task));
-
-  top.append(title, editBtn);
-  card.append(top);
-
   if (task.description) {
-    const description = document.createElement("p");
-    description.className = "card-description";
-    description.textContent = task.description;
-    card.append(description);
+    card.append(el("p", "card-description", task.description));
   }
 
-  const meta = document.createElement("div");
-  meta.className = "card-meta";
-
-  const badge = document.createElement("span");
-  badge.className = `priority-badge priority-${task.priority.toLowerCase()}`;
-  badge.textContent = task.priority;
-  meta.append(badge);
-
+  const meta = el(
+    "div",
+    "card-meta",
+    "",
+    el("span", `priority-badge priority-${task.priority.toLowerCase()}`, task.priority),
+  );
   if (task.assignee) {
-    const assignee = document.createElement("span");
-    assignee.className = "card-assignee";
-    assignee.textContent = task.assignee;
-    meta.append(assignee);
+    meta.append(el("span", "card-assignee", task.assignee));
   }
 
   card.append(meta);
