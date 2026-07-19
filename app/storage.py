@@ -33,16 +33,18 @@ def get_all_tasks(
     overdue: bool | None = None,
     tag: str | None = None,
 ) -> list[dict]:
-    tasks = list(_tasks.values())
-    if status is not None:
-        tasks = [t for t in tasks if t["status"] == status]
-    if priority is not None:
-        tasks = [t for t in tasks if t["priority"] == priority]
-    if overdue is not None:
-        tasks = [t for t in tasks if is_overdue(t["due_date"], t["status"]) == overdue]
-    if tag is not None:
-        tasks = [t for t in tasks if tag in t["tags"]]
-    return tasks
+    def matches(task: dict) -> bool:
+        if status is not None and task["status"] != status:
+            return False
+        if priority is not None and task["priority"] != priority:
+            return False
+        if overdue is not None and is_overdue(task["due_date"], task["status"]) != overdue:
+            return False
+        if tag is not None and tag not in task["tags"]:
+            return False
+        return True
+
+    return [task for task in _tasks.values() if matches(task)]
 
 
 def get_task_by_id(task_id: int) -> dict | None:

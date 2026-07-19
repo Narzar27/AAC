@@ -10,6 +10,23 @@ deployment.
 
 ![Kanban board](docs/board.png)
 
+## Mid-course project (branch `mid-course-project`)
+
+Two features added end-to-end with the course AI-assisted workflow:
+
+1. **Due dates + overdue filter** — optional `due_date` (`YYYY-MM-DD`, null clears
+   it on edit), a backend-computed `is_overdue` field, `GET /tasks?overdue=`,
+   a due/overdue badge on cards, and an "Overdue only" board toggle.
+2. **Tags / labels** — validated `tags` list (trimmed, non-empty, ≤10 × ≤30 chars,
+   no duplicates), `GET /tasks?tag=`, comma-separated input in the modal, tag chips
+   on cards, and a tag filter in the board's filter bar.
+
+Documentation for the project (user stories, mini-ADR, prompt log, verification
+evidence, reflection) lives in [`docs/midcourse/`](docs/midcourse/). How to run the
+backend, frontend, and tests is below — nothing extra is needed beyond
+`pip install -r requirements.txt` (plus `python -m playwright install chromium`
+once, for the browser contract).
+
 ## Project structure
 
 ```
@@ -41,7 +58,7 @@ docs/                # user stories, ADR, behavior contract, debugging + other l
 | Method | Path | Success | Errors |
 |---|---|---|---|
 | POST | `/tasks` | 201 + task | 422 invalid body |
-| GET | `/tasks?status=&priority=` | 200 + list (possibly `[]`) | 422 invalid filter value |
+| GET | `/tasks?status=&priority=&overdue=&tag=` | 200 + list (possibly `[]`) | 422 invalid filter value |
 | GET | `/tasks/{id}` | 200 + task | 404 missing |
 | PATCH | `/tasks/{id}` | 200 + task | 404 missing, 422 invalid payload/transition |
 | DELETE | `/tasks/{id}` | 204, empty body | 404 missing |
