@@ -1,0 +1,330 @@
+/* Task Tracker board — Module 3 frontend */
+
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-muted: #ebecf0;
+  --text: #172b4d;
+  --text-muted: #5e6c84;
+  --border: #dfe1e6;
+  --primary: #8b1d3f;          /* course maroon */
+  --primary-hover: #731834;
+  --danger: #c0392b;
+  --danger-bg: #fdecea;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(23, 43, 77, 0.12);
+  --priority-high: #c0392b;
+  --priority-medium: #b07a1f;
+  --priority-low: #4a6f8a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* --- Header ------------------------------------------------------------ */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+/* --- Buttons ------------------------------------------------------------ */
+
+.btn {
+  font: inherit;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--surface-muted);
+}
+
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-icon {
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.25rem 0.5rem;
+  color: var(--text-muted);
+}
+
+.btn-icon:hover {
+  background: var(--surface-muted);
+  border-radius: var(--radius);
+}
+
+/* --- Board message (loading / error) ------------------------------------ */
+
+.board-message {
+  margin: 1rem 1.5rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.board-message.is-error {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* --- Board and columns --------------------------------------------------- */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(240px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .board {
+    grid-template-columns: 1fr;
+  }
+}
+
+.column {
+  background: var(--surface-muted);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  min-height: 12rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.25rem;
+}
+
+.column-header h2 {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.column-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.column.drag-over {
+  outline: 2px dashed var(--primary);
+  outline-offset: -4px;
+}
+
+.column-empty {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 0.5rem;
+  margin: 0;
+}
+
+/* --- Cards ---------------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 0.65rem 0.75rem;
+  cursor: grab;
+}
+
+.card.dragging {
+  opacity: 0.5;
+}
+
+.card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.card-description {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.card-assignee {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.priority-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  color: #fff;
+}
+
+.priority-badge.priority-high { background: var(--priority-high); }
+.priority-badge.priority-medium { background: var(--priority-medium); }
+.priority-badge.priority-low { background: var(--priority-low); }
+
+/* --- Modal ------------------------------------------------------------------ */
+
+/* Author display value would otherwise beat the hidden attribute's UA style. */
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(23, 43, 77, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 30px rgba(23, 43, 77, 0.3);
+  width: 100%;
+  max-width: 480px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.modal form {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.form-field {
+  margin-bottom: 0.85rem;
+  flex: 1;
+}
+
+.form-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.form-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.required {
+  color: var(--danger);
+}
+
+.form-field input[type="text"],
+.form-field textarea,
+.form-field select {
+  width: 100%;
+  font: inherit;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 0;
+  border-color: var(--primary);
+}
+
+.field-error {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--danger);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}

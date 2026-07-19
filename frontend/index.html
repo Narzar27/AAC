@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Tracker</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Task Tracker</h1>
+    <button type="button" id="new-task-btn" class="btn btn-primary">+ New Task</button>
+  </header>
+
+  <p id="board-message" class="board-message" hidden></p>
+
+  <main id="board" class="board" aria-busy="true">
+    <!-- Columns are rendered by js/board.js: one per API status
+         (ToDo, InProgress, Done), each with a header, count, and card list. -->
+  </main>
+
+  <!-- Create / Edit modal -->
+  <div id="modal-overlay" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header class="modal-header">
+        <h2 id="modal-title">New Task</h2>
+        <button type="button" id="modal-close-btn" class="btn btn-icon" aria-label="Close">&times;</button>
+      </header>
+
+      <form id="task-form" novalidate>
+        <input type="hidden" id="field-task-id" />
+
+        <div class="form-field">
+          <label for="field-title">Title <span class="required">*</span></label>
+          <input type="text" id="field-title" name="title" maxlength="200" autocomplete="off" />
+          <p class="field-error" id="error-title" hidden></p>
+        </div>
+
+        <div class="form-field">
+          <label for="field-description">Description</label>
+          <textarea id="field-description" name="description" rows="3"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="field-status">Status</label>
+            <select id="field-status" name="status">
+              <option value="ToDo">To Do</option>
+              <option value="InProgress">In Progress</option>
+              <option value="Done">Done</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="field-priority">Priority</label>
+            <select id="field-priority" name="priority">
+              <option value="High">High</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="field-assignee">Assignee</label>
+          <input type="text" id="field-assignee" name="assignee" autocomplete="off" />
+        </div>
+
+        <p class="field-error" id="error-server" hidden></p>
+
+        <footer class="modal-footer">
+          <button type="button" id="modal-cancel-btn" class="btn">Cancel</button>
+          <button type="submit" id="modal-save-btn" class="btn btn-primary">Save</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
