@@ -1,4 +1,60 @@
-# Task Tracker — Modules 1–3
+# Task Tracker — AI-Assisted Coding course project
+
+## Final Project
+
+Branch reviewed: **final-project**
+
+### What this submission demonstrates
+- Existing Task Tracker app still runs inside the intended course scope (no new
+  product features; `app/` and `frontend/` untouched in the final project).
+- CI runs the pytest suite on push and pull request (green on this branch).
+- Docker image builds and runs with `/health` returning 200 as non-root `app`.
+- AI review, security, and ownership evidence is in `docs/`.
+
+### How to run locally
+```bash
+python -m venv venv
+venv\Scripts\activate                   # Windows (macOS/Linux: source venv/bin/activate)
+pip install -r requirements-dev.txt
+python -m uvicorn app.main:app --reload --port 8000
+# in a second terminal, for the Kanban board:
+python -m http.server 5500 --directory frontend    # open http://localhost:5500
+```
+
+### How to run tests
+```bash
+python -m pytest tests/ -v              # 49 tests
+```
+
+### How to run with Docker
+```bash
+docker build -t task-tracker:dev .
+docker run --rm -d -p 8000:8000 --name tt-dev task-tracker:dev
+curl -i http://localhost:8000/health    # expect HTTP 200
+docker exec tt-dev whoami               # expect: app
+docker stop tt-dev
+```
+
+### Evidence files
+- [docs/release-evidence.md](docs/release-evidence.md)
+- [docs/final-ai-review.md](docs/final-ai-review.md)
+- [docs/ai-playbook.md](docs/ai-playbook.md)
+
+### AI assistance summary
+AI helped draft or review: backend/frontend code (Modules 1–3), CI, Docker,
+docs, security review, and debugging across the course.
+I verified the work by: the 49-test pytest suite, a 19-check Playwright
+behavior contract driving the live board, diff review before every accept,
+Docker runtime checks (`/health` 200, `whoami` → `app`), CI green→red→green
+proof, and claim-vs-reality documentation audits.
+One AI suggestion I rejected or corrected: the final review proposed fixing two
+security findings (pin dependencies, bound field lengths) on submission day —
+rejected as out of scope for the protected final branch and deferred to the
+ranked backlog in `docs/security-review.md`.
+
+---
+
+# Course history — Modules 1–3
 
 Task Tracker for the AI-Assisted Coding course. Module 1 built the FastAPI skeleton
 with `/health`; Module 2 turned it into a working backend (strict Pydantic v2 models,

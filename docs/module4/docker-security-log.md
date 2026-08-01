@@ -20,20 +20,19 @@ stage copies the installed packages plus `app/` only. The CMD runs
    `.git`, `venv`/`.venv`, caches, `tests/`, `docs/`, `frontend/`, and editor/OS
    files, so no secret or local file can leak in via a broad COPY later.
 
-## Runtime verification (commands, not yet executed)
+## Runtime verification (executed 2026-08-01, final project)
 
-Local build/run verification was deliberately skipped in this pass (grader or
-author can run it in ~2 minutes). The commands and expected evidence:
+Originally deferred; captured during the final-project release check:
 
-```bash
-docker build -t task-tracker:dev .        # expect: successful build
+```
+docker build -t task-tracker:dev .   -> build succeeded; image size 233MB
 docker run --rm -d -p 8000:8000 --name tt-dev task-tracker:dev
-curl -i http://localhost:8000/health      # expect: HTTP/1.1 200 + {"status":"ok",...}
-docker exec tt-dev whoami                 # expect: app   (the security check)
-docker images task-tracker:dev            # record the size; slim base keeps it small
+GET http://localhost:8000/health     -> 200 {"status":"ok","timestamp":"2026-08-01T12:30:18.867622+00:00"}
+docker exec tt-dev whoami            -> app        (non-root confirmed)
+docker exec tt-dev ls /srv           -> app        (only the application package inside)
+docker exec tt-dev env               -> 0 matches for KEY|TOKEN|SECRET|PASS
 docker stop tt-dev
 ```
 
-No fabricated outputs are recorded here: the three security properties above are
-asserted from the committed files; the runtime checks are listed as the
-outstanding evidence to capture.
+All three security-log properties now have runtime evidence, not just
+file-inspection evidence.
