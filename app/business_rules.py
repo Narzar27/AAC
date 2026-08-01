@@ -21,6 +21,17 @@ VALID_TRANSITIONS: frozenset[tuple[TaskStatus, TaskStatus]] = frozenset(
 
 
 def validate_status_transition(current: TaskStatus, new: TaskStatus) -> None:
+    """Reject any status change that is not an explicitly allowed pair.
+
+    Args:
+        current: The task's stored status.
+        new: The status requested in the PATCH payload.
+
+    Raises:
+        InvalidStatusTransition: If ``(current, new)`` is not in
+            ``VALID_TRANSITIONS`` — including ``current == new``, since
+            same-status no-ops are deliberately not valid transitions.
+    """
     if (current, new) not in VALID_TRANSITIONS:
         allowed = sorted(f"{c.value} -> {n.value}" for c, n in VALID_TRANSITIONS)
         raise InvalidStatusTransition(

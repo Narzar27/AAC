@@ -1,0 +1,8 @@
+-r requirements.txt
+
+# testing
+pytest
+httpx2
+
+# browser behavior contract (also run: python -m playwright install chromium)
+playwright
