@@ -18,7 +18,7 @@ def move_to_status(client, task_id: int, *statuses: str) -> None:
 
 def test_create_task_returns_201_with_server_fields(client):
     response = client.post("/tasks", json={"title": "New task"})
-    assert response.status_code == 201
+    assert response.status_code == 200  # INTENTIONAL CI RED-RUN PROOF: real code returns 201
     body = response.json()
     assert body["id"] == 1
     assert body["title"] == "New task"
