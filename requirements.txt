@@ -1,6 +1,3 @@
+# Runtime dependencies only — test/dev tools live in requirements-dev.txt
 fastapi
 uvicorn[standard]
-
-# testing
-pytest
-httpx2
