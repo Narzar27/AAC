@@ -38,6 +38,20 @@ evidence, reflection) lives in [`docs/midcourse/`](docs/midcourse/).
 - **Evidence logs** — setup verification, claim-vs-reality documentation audit,
   AI review triage, and tool-fit reflection in [`docs/module4/`](docs/module4/).
 
+## Module 5: security, governance & the closing playbook
+
+Module 5 is evaluation, not features — all deliverables are documents:
+[`AGENTS.md`](AGENTS.md) (agent guardrails),
+[`docs/security-review.md`](docs/security-review.md) (graded findings +
+reconciliation + top-3 backlog),
+[`docs/governance-worksheet.md`](docs/governance-worksheet.md) and
+[`docs/ai-usage.md`](docs/ai-usage.md) (shared/received audit + binding rules),
+[`docs/decisions/comments-feature-plan.md`](docs/decisions/comments-feature-plan.md)
+(planned, deliberately not built),
+[`docs/architecture.md`](docs/architecture.md) (merged from the A/B/C context
+experiments), and **[`docs/ai-playbook.md`](docs/ai-playbook.md)** — the
+one-page personal playbook that closes the course.
+
 ## Project structure
 
 ```
