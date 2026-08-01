@@ -22,10 +22,21 @@ Two features added end-to-end with the course AI-assisted workflow:
    on cards, and a tag filter in the board's filter bar.
 
 Documentation for the project (user stories, mini-ADR, prompt log, verification
-evidence, reflection) lives in [`docs/midcourse/`](docs/midcourse/). How to run the
-backend, frontend, and tests is below — nothing extra is needed beyond
-`pip install -r requirements.txt` (plus `python -m playwright install chromium`
-once, for the browser contract).
+evidence, reflection) lives in [`docs/midcourse/`](docs/midcourse/).
+
+## Module 4 (branch `module-4`): delivery layer
+
+- **CI** — [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs the pytest
+  suite on every push and pull request (Python 3.14 pinned, no failure-swallowing
+  flags). Proven green → red → green; evidence in
+  [`docs/module4/ci-evidence.md`](docs/module4/ci-evidence.md).
+- **Docker** — multi-stage [`Dockerfile`](Dockerfile) (slim base, non-root `app`
+  user, runtime deps only) plus [`.dockerignore`](.dockerignore); see
+  [`docs/module4/docker-security-log.md`](docs/module4/docker-security-log.md).
+- **Project memory** — [`CLAUDE.md`](CLAUDE.md) for terminal-agent sessions.
+- **Decision note** — [In-memory dict as the task storage layer](docs/decisions/in-memory-storage.md).
+- **Evidence logs** — setup verification, claim-vs-reality documentation audit,
+  AI review triage, and tool-fit reflection in [`docs/module4/`](docs/module4/).
 
 ## Project structure
 
@@ -70,13 +81,19 @@ same-status no-ops — returns 422.
 
 ## Setup and run
 
+Prerequisites: Python 3.14, and Docker only if you want the container path.
+
 ```bash
 python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # macOS / Linux
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+venv\Scripts\activate            # Windows
+# source venv/bin/activate       # macOS / Linux
+pip install -r requirements-dev.txt   # runtime + test deps
+python -m playwright install chromium # once, only for the browser contract
+uvicorn app.main:app --reload --port 8000
 ```
+
+`requirements.txt` alone is the runtime set (FastAPI + Uvicorn) — it is what the
+Docker image installs; `requirements-dev.txt` adds pytest, httpx2, and Playwright.
 
 Swagger docs: http://localhost:8000/docs
 
@@ -88,11 +105,38 @@ python -m http.server 5500 --directory frontend
 # open http://localhost:5500
 ```
 
+## Run with Docker (backend only)
+
+```bash
+docker build -t task-tracker:dev .
+docker run --rm -d -p 8000:8000 --name tt-dev task-tracker:dev
+curl -i http://localhost:8000/health
+docker exec tt-dev whoami   # expected: app (not root)
+docker stop tt-dev
+```
+
+The image contains only `app/` and the runtime dependencies; storage is in-memory,
+so a container restart starts with an empty board.
+
+## CI
+
+GitHub Actions ([`ci.yml`](.github/workflows/ci.yml)) runs `pytest tests/ -v` on
+Python 3.14 for every push and pull request. A failing test fails the workflow —
+this was proven by an intentional red run, not assumed.
+
 ## Verification
 
 ```bash
 python -m tests.verify_a         # 8 model checks, all PASS
-pytest tests/ -v                 # full backend suite
-python -m tests.verify_frontend  # 14 browser contract checks (needs both servers
+pytest tests/ -v                 # full backend suite (49 tests)
+python -m tests.verify_frontend  # 19 browser contract checks (needs both servers
                                  # running and playwright chromium installed)
 ```
+
+## Project conventions and current limitations
+
+Backend owns all business rules (the UI never re-implements them); PATCH sends
+only changed fields; tests must fail when the behavior they protect is broken
+(Break Tests). Limitations by design: no auth, no database (tasks reset on
+restart), no deployment automation — see the
+[decision note](docs/decisions/in-memory-storage.md).

@@ -1,3 +1,10 @@
+"""Pydantic v2 models and field-level validation rules for tasks.
+
+Client input models (`TaskCreate`, `TaskUpdate`) forbid extra fields and never
+accept server-managed values (id, timestamps). `TaskResponse` is the only
+shape the API returns and carries the computed `is_overdue` flag.
+"""
+
 from datetime import date, datetime
 from enum import Enum
 
@@ -26,6 +33,17 @@ def is_overdue(due_date: date | None, status: TaskStatus) -> bool:
 
 
 def _validate_title(value: str) -> str:
+    """Strip surrounding whitespace and reject titles that end up empty.
+
+    Args:
+        value: Raw title from the client.
+
+    Returns:
+        The trimmed title.
+
+    Raises:
+        ValueError: If the title is empty or whitespace-only (surfaces as 422).
+    """
     stripped = value.strip()
     if not stripped:
         raise ValueError("title must not be empty or whitespace-only")
@@ -36,6 +54,19 @@ MAX_TAG_LENGTH = 30
 
 
 def _validate_tags(tags: list[str]) -> list[str]:
+    """Trim each tag and enforce the tag rules.
+
+    Args:
+        tags: Raw tag list from the client (count is capped at 10 by the
+            Field constraint on the models, not here).
+
+    Returns:
+        Trimmed tags in their original order and case.
+
+    Raises:
+        ValueError: If a tag is empty after trimming, longer than
+            ``MAX_TAG_LENGTH``, or a duplicate (surfaces as 422).
+    """
     cleaned: list[str] = []
     for tag in tags:
         stripped = tag.strip()
